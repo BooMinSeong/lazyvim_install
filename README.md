@@ -5,6 +5,26 @@
 
 ## 빠른 시작
 
+### 한 줄 설치
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/BooMinSeong/lazyvim_install/main/install.sh | bash
+source ~/.bashrc
+nvim
+```
+
+옵션은 `bash -s --` 뒤에 붙입니다.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/BooMinSeong/lazyvim_install/main/install.sh | bash -s -- --backend conda
+```
+
+`curl`이 없으면 `wget -qO- <URL> | bash`를 쓰세요.
+
+### 파일로 받아서 실행
+
+GitHub에 접근할 수 없는 서버에서 쓰거나, 스크립트 내용을 먼저 확인하고 싶을 때 사용합니다.
+
 ```bash
 # 로컬 PC에서 서버로 스크립트 복사
 scp install.sh myserver:~/
@@ -104,6 +124,8 @@ export EDITOR=nvim
 
 - 기존 `lua/config/*.lua`나 `lua/plugins/*.lua`를 수정해서 쓰고 있었다면 백업에서 새 `~/.config/nvim`으로 옮기세요.
 - `/opt`, `/usr/local/bin`처럼 root 권한으로 설치한 nvim/lazygit은 지울 수 없습니다. `~/.local/bin`이 PATH 맨 앞에 있으므로 새로 설치한 버전이 우선 실행됩니다.
+- 스크립트를 다시 실행하면 그 시점의 설정도 새로 백업되고, 설정은 LazyVim starter로 다시 설치됩니다. 도구만 업데이트하려면 `--no-config`를 쓰세요.
+- 이전 설치에서 `~/.bashrc`에 직접 넣은 PATH 줄(예: `/opt/nvim-linux-x86_64/bin`)은 수정하지 않습니다. 새 PATH 블록이 앞쪽에 오므로 동작에는 영향이 없지만, 정리하려면 해당 줄을 직접 지우세요.
 - 문제가 없는 것을 확인했다면 백업은 `rm -rf ~/.config/nvim.bak-* ~/.local/share/nvim.bak-* ~/.local/state/nvim.bak-* ~/.cache/nvim.bak-*`로 지우면 됩니다.
 
 ## 설치 확인

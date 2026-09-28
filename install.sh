@@ -370,52 +370,63 @@ uninstall() {
 }
 
 # ---------- main ----------
-while [ $# -gt 0 ]; do
-  case "$1" in
-    --backend) BACKEND="$2"; shift ;;
-    --backend=*) BACKEND="${1#*=}" ;;
-    --no-node) WITH_NODE=0 ;;
-    --no-config) WITH_CONFIG=0 ;;
-    --no-rc) WITH_RC=0 ;;
-    --skip-bootstrap) BOOTSTRAP=0 ;;
-    --uninstall) ACTION=uninstall ;;
-    --doctor) ACTION=doctor ;;
-    -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
-    *) die "unknown option: $1" ;;
+# wrapped in a function so `curl ... | bash` parses the whole script before
+# running anything (child processes can't swallow the rest of it from stdin)
+usage() {
+  if [ -f "${BASH_SOURCE[0]:-}" ]; then sed -n '2,20p' "${BASH_SOURCE[0]}"
+  else echo "see https://github.com/BooMinSeong/lazyvim_install#옵션"; fi
+}
+
+main() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --backend) BACKEND="$2"; shift ;;
+      --backend=*) BACKEND="${1#*=}" ;;
+      --no-node) WITH_NODE=0 ;;
+      --no-config) WITH_CONFIG=0 ;;
+      --no-rc) WITH_RC=0 ;;
+      --skip-bootstrap) BOOTSTRAP=0 ;;
+      --uninstall) ACTION=uninstall ;;
+      --doctor) ACTION=doctor ;;
+      -h|--help) usage; exit 0 ;;
+      *) die "unknown option: $1" ;;
+    esac
+    shift
+  done
+  case "$BACKEND" in auto|github|conda) ;; *) die "--backend must be auto, github or conda" ;; esac
+
+  case "$ACTION" in
+    doctor) doctor; exit 0 ;;
+    uninstall) uninstall; exit 0 ;;
   esac
-  shift
-done
-case "$BACKEND" in auto|github|conda) ;; *) die "--backend must be auto, github or conda" ;; esac
 
-case "$ACTION" in
-  doctor) doctor; exit 0 ;;
-  uninstall) uninstall; exit 0 ;;
-esac
+  detect_platform
+  for t in git tar gzip; do have "$t" || die "$t is required"; done
+  have unzip || warn "unzip not found: some Mason packages will fail to install"
 
-detect_platform
-for t in git tar gzip; do have "$t" || die "$t is required"; done
-have unzip || warn "unzip not found: some Mason packages will fail to install"
+  mkdir -p "$BIN" "$OPT"
+  NVIM_FROM=""
+  install_nvim
+  install_treesitter
+  install_ripgrep
+  install_fd
+  install_lazygit
+  install_fzf
+  install_node
+  install_cc
+  install_conda_pkgs
+  link_conda_bins
 
-mkdir -p "$BIN" "$OPT"
-NVIM_FROM=""
-install_nvim
-install_treesitter
-install_ripgrep
-install_fd
-install_lazygit
-install_fzf
-install_node
-install_cc
-install_conda_pkgs
-link_conda_bins
+  setup_rc
+  install_starter
+  "$BIN/nvim" --version >/dev/null 2>&1 || die "nvim does not run on this host"
+  ok "$("$BIN/nvim" --version | sed -n 1p)"
+  bootstrap
 
-setup_rc
-install_starter
-"$BIN/nvim" --version >/dev/null 2>&1 || die "nvim does not run on this host"
-ok "$("$BIN/nvim" --version | sed -n 1p)"
-bootstrap
+  echo
+  doctor
+  echo
+  ok "done. open a new shell (or: source ~/.bashrc) and run: nvim"
+}
 
-echo
-doctor
-echo
-ok "done. open a new shell (or: source ~/.bashrc) and run: nvim"
+main "$@"
