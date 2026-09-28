@@ -271,6 +271,7 @@ NVIM_DIRS=("$HOME/.config/nvim" "$HOME/.local/share/nvim" "$HOME/.local/state/nv
 
 backup_nvim_dirs() {
   local ts; ts=$(date +%Y%m%d-%H%M%S)
+  BACKUP_TS=$ts
   local d
   for d in "${NVIM_DIRS[@]}"; do
     if [ -e "$d" ]; then
@@ -284,6 +285,14 @@ install_starter() {
   [ "$WITH_CONFIG" = 1 ] || return 0
   have git || die "git is required"
   backup_nvim_dirs
+  # keep editing history (oldfiles, marks, registers): the projects picker
+  # (<leader>fp) builds its list from recent files stored in shada
+  local old_shada="$HOME/.local/state/nvim.bak-$BACKUP_TS/shada"
+  if [ -d "$old_shada" ]; then
+    mkdir -p "$HOME/.local/state/nvim"
+    cp -a "$old_shada" "$HOME/.local/state/nvim/"
+    ok "restored shada history (recent files / projects)"
+  fi
   log "cloning LazyVim starter"
   git clone --depth 1 -q "$STARTER_REPO" "$HOME/.config/nvim"
   rm -rf "$HOME/.config/nvim/.git"

@@ -122,6 +122,7 @@ export EDITOR=nvim
 ~/.cache/nvim       -> ~/.cache/nvim.bak-...
 ```
 
+- 최근 파일 기록(`~/.local/state/nvim/shada`)은 새 설치에도 복사합니다. `<leader>fp` Projects 목록이 이 기록으로 만들어지기 때문입니다.
 - 기존 `lua/config/*.lua`나 `lua/plugins/*.lua`를 수정해서 쓰고 있었다면 백업에서 새 `~/.config/nvim`으로 옮기세요.
 - `/opt`, `/usr/local/bin`처럼 root 권한으로 설치한 nvim/lazygit은 지울 수 없습니다. `~/.local/bin`이 PATH 맨 앞에 있으므로 새로 설치한 버전이 우선 실행됩니다.
 - 스크립트를 다시 실행하면 그 시점의 설정도 새로 백업되고, 설정은 LazyVim starter로 다시 설치됩니다. 도구만 업데이트하려면 `--no-config`를 쓰세요.
@@ -142,6 +143,12 @@ nvim +"checkhealth lazyvim"     # 모든 항목이 OK여야 함
 **일부 treesitter 파서가 누락됨 (`ENOTEMPTY: Could not rename temp`)**
 `Lazy! sync` 단계에서 LazyVim이 비동기로 파서 설치를 시작합니다. 이때 headless nvim이 종료되면 설치가 중간 상태로 남을 수 있습니다.
 스크립트는 누락된 파서를 확인하면서 최대 3회 재시도합니다. 그래도 누락되면 nvim 안에서 `:TSUpdate`를 실행하세요.
+
+**`<leader>fp` Projects 목록이 비어 있음**
+Projects 목록은 최근에 연 파일 중 `.git`, `package.json`, `Makefile` 등이 있는 루트 폴더와 `~/dev`, `~/projects` 아래 폴더로 만들어집니다.
+새 서버에서는 기록이 없어 목록이 비어 있으니, 프로젝트 파일을 몇 개 열어보면 목록이 채워집니다.
+이전 버전의 스크립트로 재설치해서 기록이 사라졌다면 백업에서 복원하세요:
+`cp -a ~/.local/state/nvim.bak-<날짜>/shada ~/.local/state/nvim/`
 
 **`nvim does not run on this host`**
 `--backend conda`로 다시 실행하세요.
