@@ -296,6 +296,13 @@ install_starter() {
   log "cloning LazyVim starter"
   git clone --depth 1 -q "$STARTER_REPO" "$HOME/.config/nvim"
   rm -rf "$HOME/.config/nvim/.git"
+  # light theme by default (catppuccin ships with LazyVim)
+  cat > "$HOME/.config/nvim/lua/plugins/colorscheme.lua" <<'EOF'
+return {
+  { "catppuccin/nvim", name = "catppuccin", opts = { flavour = "latte" } },
+  { "LazyVim/LazyVim", opts = { colorscheme = "catppuccin-latte" } },
+}
+EOF
   ok "config at ~/.config/nvim"
 }
 
